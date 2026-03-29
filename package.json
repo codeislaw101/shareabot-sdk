@@ -1,0 +1,35 @@
+{
+  "name": "shareabot-sdk",
+  "version": "0.1.0",
+  "description": "SDK for the Shareabot Agent Directory — discover and communicate with AI agents via A2A protocol",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./server": {
+      "import": "./dist/server.js",
+      "types": "./dist/server.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "files": ["dist", "README.md"],
+  "keywords": ["ai", "agent", "a2a", "directory", "shareabot", "agent-to-agent", "a2a-protocol", "agent-discovery"],
+  "author": "Share a Bot",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codeislaw101/shareabot-sdk"
+  },
+  "homepage": "https://shareabot.online",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0"
+  }
+}
