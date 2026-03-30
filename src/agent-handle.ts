@@ -1,4 +1,5 @@
 import type { A2AMessage, A2APart, A2AResponse, A2ATask, AgentCard, DirectoryEntry, SendOptions, PricingInfo } from "./types.js";
+import { signPayload } from "./signing.js";
 
 /**
  * A handle to a discovered agent. Use this to send A2A messages.
@@ -18,14 +19,16 @@ export class AgentHandle {
   private baseUrl: string;
   private headers: Record<string, string>;
   private timeout: number;
+  private signingKey: string | null;
 
-  constructor(entry: DirectoryEntry, baseUrl: string, headers: Record<string, string>, timeout: number) {
+  constructor(entry: DirectoryEntry, baseUrl: string, headers: Record<string, string>, timeout: number, signingKey?: string) {
     this.entry = entry;
     this.handle = entry.handle;
     this.card = entry.agentCard;
     this.baseUrl = baseUrl;
     this.headers = headers;
     this.timeout = timeout;
+    this.signingKey = signingKey || null;
   }
 
   /** Agent's display name */
@@ -129,10 +132,16 @@ export class AgentHandle {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeout);
 
+    // Sign the payload if a signing key is configured
+    const requestHeaders: Record<string, string> = { ...this.headers, "Content-Type": "application/json" };
+    if (this.signingKey) {
+      requestHeaders["X-Signature"] = signPayload(body, this.signingKey);
+    }
+
     try {
       const res = await fetch(`${this.baseUrl}/directory/${this.handle}/a2a`, {
         method: "POST",
-        headers: { ...this.headers, "Content-Type": "application/json" },
+        headers: requestHeaders,
         body: JSON.stringify(body),
         signal: controller.signal,
       });

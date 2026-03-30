@@ -1,5 +1,6 @@
 import type { A2AMessage, A2APart, A2ATask, A2AArtifact, A2ASkill } from "./types.js";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { verifySignature } from "./signing.js";
 
 export type MessageHandler = (message: A2AMessage, context: RequestContext) => Promise<AgentResponse>;
 
@@ -8,6 +9,10 @@ export interface RequestContext {
   sender: string | null;
   /** Whether the sender is verified on-chain */
   senderVerified: boolean;
+  /** Whether the message signature was verified by the proxy */
+  signatureValid: boolean | null;
+  /** The sender's verification level: 'anonymous', 'api_key', 'signed', 'verified' */
+  verificationLevel: string;
   /** The JSON-RPC method called */
   method: string;
   /** The full JSON-RPC request body */
@@ -88,7 +93,7 @@ export class AgentServer {
     });
   }
 
-  private async handleRequest(req: IncomingMessage, res: ServerResponse) {
+  async handleRequest(req: IncomingMessage, res: ServerResponse) {
     // Serve Agent Card at well-known URL
     if (req.method === "GET" && req.url?.includes(".well-known/agent.json")) {
       res.writeHead(200, { "Content-Type": "application/json" });
@@ -147,6 +152,8 @@ export class AgentServer {
         const context: RequestContext = {
           sender: body._directory?.sender || null,
           senderVerified: body._directory?.senderVerified || false,
+          signatureValid: body._directory?.signatureValid ?? null,
+          verificationLevel: body._directory?.verificationLevel || "anonymous",
           method: body.method,
           raw: body,
         };

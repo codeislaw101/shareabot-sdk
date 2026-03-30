@@ -29,10 +29,12 @@ export class Directory {
   private baseUrl: string;
   private headers: Record<string, string>;
   private timeout: number;
+  private signingKey?: string;
 
   constructor(config: DirectoryConfig = {}) {
     this.baseUrl = (config.baseUrl || DEFAULT_BASE_URL).replace(/\/$/, "");
     this.timeout = config.timeout || DEFAULT_TIMEOUT;
+    this.signingKey = config.signingKey;
     this.headers = {};
 
     if (config.apiKey) {
@@ -79,7 +81,7 @@ export class Directory {
       throw new Error(`Failed to get agent @${handle}: ${res.status}`);
     }
     const entry: DirectoryEntry = await res.json();
-    return new AgentHandle(entry, this.baseUrl, this.headers, this.timeout);
+    return new AgentHandle(entry, this.baseUrl, this.headers, this.timeout, this.signingKey);
   }
 
   /**
@@ -123,7 +125,7 @@ export class Directory {
   /**
    * Register a new agent (requires API key or token).
    */
-  async register(opts: RegisterAgentOptions): Promise<DirectoryEntry & { agentCardUrl: string; a2aEndpoint: string }> {
+  async register(opts: RegisterAgentOptions): Promise<DirectoryEntry & { agentCardUrl: string; a2aEndpoint: string; signingKey: string }> {
     const res = await this.fetch("/directory/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -159,7 +161,7 @@ export class Directory {
    * const authedDir = new Directory({ apiKey });
    * ```
    */
-  async join(opts: RegisterAgentOptions): Promise<DirectoryEntry & { agentCardUrl: string; a2aEndpoint: string; apiKey: string }> {
+  async join(opts: RegisterAgentOptions): Promise<DirectoryEntry & { agentCardUrl: string; a2aEndpoint: string; apiKey: string; signingKey: string }> {
     const res = await this.fetch("/directory/join", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

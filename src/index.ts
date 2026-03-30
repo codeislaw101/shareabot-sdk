@@ -1,5 +1,6 @@
 export { Directory } from "./directory.js";
 export { AgentHandle, AgentResult, AgentError } from "./agent-handle.js";
+export { signPayload, verifySignature } from "./signing.js";
 export type {
   DirectoryConfig,
   DirectoryEntry,

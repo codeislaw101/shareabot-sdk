@@ -90,6 +90,8 @@ export interface DirectoryConfig {
   baseUrl?: string;
   /** Request timeout in ms (default 30000) */
   timeout?: number;
+  /** Base64-encoded Ed25519 private key for signing A2A messages (from registration) */
+  signingKey?: string;
 }
 
 // ── Registration ──
